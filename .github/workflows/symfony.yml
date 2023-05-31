@@ -46,6 +46,9 @@ jobs:
       run: |
         composer update
         composer install
+        
+#     - name: Set Permissions
+#       run: chmod -R 777 /var/www/html
       
     - name: Build Symfony application
       run: |
