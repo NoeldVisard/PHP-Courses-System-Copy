@@ -19,7 +19,7 @@ RUN composer install --no-scripts --no-autoloader --no-dev
 COPY . /var/www/html
 
 # Установка правильных разрешений на директории и файлы
-RUN chown -R www-data:www-data /var/www/html/var
+RUN chown -R www-data:www-data /var/www/html
 
 # Установка правильного пользователя
 USER www-data
