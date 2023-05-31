@@ -50,8 +50,10 @@ jobs:
         php bin/console cache:warmup --env=prod
         php bin/console assets:install --env=prod
         
-    - name: Set up Docker
-      uses: docker/setup-docker@v2
+#     - name: Set up Docker
+#       uses: docker/setup-docker@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
       
     - name: Build and tag Docker image
       run: |
