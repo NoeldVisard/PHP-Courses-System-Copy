@@ -44,8 +44,8 @@ jobs:
     - name: Install Dependencies
       #run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
       run: |
-        composer install
         composer update
+        composer install
       
     - name: Build Symfony application
       run: |
