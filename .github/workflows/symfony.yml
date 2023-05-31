@@ -70,14 +70,14 @@ jobs:
         docker push docker.io/image-rodion:latest
         
     - name: Send Telegram notification - Trigger
-      uses: appleboy/telegram-action@v0.2.0
+      uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         message: "Build triggered by ${{ github.actor }}"
 
     - name: Send Telegram notification - Build Result
-      uses: appleboy/telegram-action@v0.2.0
+      uses: appleboy/telegram-action@master
       with:
         to: ${{ secrets.TELEGRAM_CHAT_ID }}
         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
