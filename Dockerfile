@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     libpq-dev \
+    apt-utils \
     && docker-php-ext-install pdo pdo_pgsql
 
 # Копирование и установка зависимостей Composer
