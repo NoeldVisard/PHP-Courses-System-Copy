@@ -1,0 +1,97 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Symfony build & deploy
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  symfony-tests:
+    runs-on: ubuntu-latest
+    steps:
+    #  To automatically get bug fixes and new Php versions for shivammathur/setup-php,
+    # change this to (see https://github.com/shivammathur/setup-php#bookmark-versioning):
+    # uses: shivammathur/setup-php@v2
+    - name: Set up PHP
+      uses: shivammathur/setup-php@2cb9b829437ee246e9b3cac53555a39208ca6d28
+      with:
+        php-version: '8.1'
+        
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Copy .env.test.local
+      run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
+      
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+          
+    - name: Install Dependencies
+      #run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      run: |
+        composer update
+        composer install
+      
+    - name: Build Symfony application
+      run: |
+        php bin/console cache:warmup --env=prod
+        php bin/console assets:install --env=prod
+        
+#     - name: Set up Docker
+#       uses: docker/setup-docker@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+      
+    - name: Build and tag Docker image
+      run: |
+        docker build -t image-rodion .
+        docker tag image-rodion docker.io/image-rodion:latest
+        
+    - name: Log in to Docker registry
+      uses: docker/login-action@v1
+      with:
+        registry: docker.io
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        
+    - name: Push Docker image
+      run: |
+        docker push docker.io/image-rodion:latest
+        
+    - name: Send Telegram notification - Trigger
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: "Build triggered by ${{ github.actor }}"
+
+    - name: Send Telegram notification - Build Result
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: "Build completed successfully"
+      
+#     - name: Create Database
+#       run: |
+#         mkdir -p data
+#         touch data/database.sqlite
+#     - name: Execute tests (Unit and Feature tests) via PHPUnit
+#       env:
+#         DATABASE_URL: sqlite:///%kernel.project_dir%/data/database.sqlite
+#       run: vendor/bin/phpunit
